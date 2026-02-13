@@ -34,18 +34,21 @@ RUN git clone https://github.com/index-tts/index-tts.git /app/index-tts && \
     cd /app/index-tts && \
     pip install --no-cache-dir -r requirements.txt || true
 
-# Download IndexTTS2 models from Hugging Face
+# Download IndexTTS2 models from Hugging Face using Python API
 RUN mkdir -p /app/models && \
-    huggingface-cli download IndexTeam/IndexTTS-2 \
-    --local-dir /app/models \
-    --local-dir-use-symlinks False
+    python -c "from huggingface_hub import snapshot_download; \
+    snapshot_download(repo_id='IndexTeam/IndexTTS-2', \
+    local_dir='/app/models', \
+    local_dir_use_symlinks=False)"
 
-# Alternative: Download specific model files only (uncomment if needed)
-# RUN mkdir -p /app/models && \
-#     huggingface-cli download IndexTeam/IndexTTS-2 gpt.pth --local-dir /app/models && \
-#     huggingface-cli download IndexTeam/IndexTTS-2 s2mel.pth --local-dir /app/models && \
-#     huggingface-cli download IndexTeam/IndexTTS-2 config.yaml --local-dir /app/models && \
-#     huggingface-cli download IndexTeam/IndexTTS-2 bigvgan_discriminator.pth --local-dir /app/models
+# Alternative: Download specific model files only (uncomment if needed to reduce size)
+# RUN python -c "from huggingface_hub import hf_hub_download; \
+#     import os; \
+#     os.makedirs('/app/models', exist_ok=True); \
+#     hf_hub_download(repo_id='IndexTeam/IndexTTS-2', filename='gpt.pth', local_dir='/app/models'); \
+#     hf_hub_download(repo_id='IndexTeam/IndexTTS-2', filename='s2mel.pth', local_dir='/app/models'); \
+#     hf_hub_download(repo_id='IndexTeam/IndexTTS-2', filename='config.yaml', local_dir='/app/models'); \
+#     hf_hub_download(repo_id='IndexTeam/IndexTTS-2', filename='bigvgan_discriminator.pth', local_dir='/app/models')"
 
 # Set model path environment variable
 ENV MODEL_PATH=/app/models
